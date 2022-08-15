@@ -1,20 +1,22 @@
 ;main:
+	Suspend, On
 	OnClipboardChange("ChangeEnterToSpace")
-	global isON := true
-	global isWaingCopy := false
+	global isON := false
+	global isWatingCopy := false
 	dMove = 150
 	dMoveSlow = 10
 	Gui, Add, Button, Default w280 gToggleWindow, CapsLock : Hide
 	Gui, Add, Button, Default w280 gToggleAndCopyAndReplace, c : copy with replacing enter to space
 	Gui, Add, Button, Default w280 gToggleAndAV, v : Ctrl + a -> Ctrl + v
-	Gui, Add, Button, Default w280 gToggleAndX, x : Ctrl + Alt + v
-	Gui, Add, Button, Default w280 gToggleAndCapture, s : 캡쳐
-	Gui, Add, Button, Default w280 gToggleAndShbookmarks, d : 크롬 북마크
-	Gui, Add, Button, Default w280 gToggleAndInvert, f : 색반전
-	Gui, Add, Text,, Ctrl + Alt + 방향키 : 커서 움직임
-	Gui, Add, Text,, Ctrl + Alt + Shift + 방향키 : 느린 커서 움직임
-	Gui, Add, Text,, Ctrl + Alt + z : 좌클릭
-	Gui, Add, Text,, Ctrl + Alt + Shift + Alt + z : 우클릭
+	Gui, Add, Button, Default w280 gToggleAndUV, f : Ctrl + Alt + v
+	Gui, Add, Button, Default w280 gToggleAndCapture, z : 캡쳐
+	Gui, Add, Button, Default w280 gToggleAndShbookmarks, x : 크롬 북마크
+	Gui, Add, Button, Default w280 gToggleAndInvert, r : 색반전
+	Gui, Add, Text,, 방향키 : 커서 움직임
+	Gui, Add, Text,, Shift + 방향키 : 느린 커서 움직임
+	Gui, Add, Text,, q, e : 클릭
+	Gui, Add, Text,, w, a, s, d : 휠
+	Gui, +AlwaysOnTop +ToolWindow
 	return
 
 GuiClose:
@@ -23,27 +25,33 @@ GuiClose:
 ToggleWindow()
 {
 	if isON
+	{
+		Suspend, On
 		Gui, hide
+	}
 	else
-		Gui, Show, w300 h320
+	{
+		Suspend, Off
+		Gui, Show, w300 h310
+	}
 	isON := !isON
 	return
 }
 
 ChangeEnterToSpace()
 {
-	if !isWaingCopy
+	if !isWatingCopy
 		return
 
 	StringReplace, clipboard, clipboard, `r`n, %A_Space%, All
-	isWaingCopy := false
+	isWatingCopy := false
 	return
 }
 
 CopyAndReplace()
 {
 	Sendinput, ^c
-	isWaingCopy := true
+	isWatingCopy := true
 	return
 }
 
@@ -64,7 +72,7 @@ ToggleAndAV()
 	return
 }
 
-ToggleAndX()
+ToggleAndUV()
 {
 	ToggleWindow()
 	Sendinput, ^!v
@@ -94,123 +102,138 @@ ToggleAndShbookmarks()
 	return
 }
 
+	
+MMove:
+	dstepSz := 0
+	Loop
+	{
+		if GetKeyState("Shift", "P")
+			dstepSz := dMoveSlow
+		else
+			dstepSz := dMove
+			
+		dx := dy := 0
+		if GetKeyState("left", "P")
+			dx := -++dstepSz
+		else if GetKeyState("right", "P")
+			dx := ++dstepSz
+		if GetKeyState("up", "P")
+			dy := -++dstepSz
+		else if GetKeyState("down", "P")
+			dy := ++dstepSz
+		if (!dx and !dy)
+			return
+		else
+			MouseMove, dx, dy,,R
+	}
+	return
+
+;---------------------------------------------------
+
 Capslock::
+	Suspend, Permit
 	ToggleWindow()
 	return
 
-~c::
-	if !isON
-		return
-	
+c::
 	ToggleAndCopyAndReplace()
 	return
 	
 !,::
+	Suspend, Permit
 	CopyAndReplace()
 	return
 	
-~x::
-	if !isON
-		return
-		
-	ToggleAndX()
+f::
+	ToggleAndUV()
 	return
 	
-~s::
-	if !isON
-		return
-		
+z::
 	ToggleAndCapture()
 	return
 	
-~d::
-	if !isON
-		return
-		
+x::
 	ToggleAndShbookmarks()
 	return
 	
-~f::
-	if !isON
-		return
-		
+r::
 	ToggleAndInvert()
 	return
 
-~v::
-	if !isON
-		return
-		
+v::
 	ToggleAndAV()
 	return
-	
-~^!Up::
-	if !isON
+
+;--------------------------------------------------------------
+
+q::
+	GetKeyState, state, LButton
+	if (state = "D")
 		return
 		
-	MouseMove, 0, (dMove * -1), 0, R
+	Click, down left
 	return
 	
-~^!Down::
-	if !isON
+q up::
+	Click, up left
+	return
+	
+e::
+	GetKeyState, state, RButton
+	if (state = "D")
 		return
 		
-	MouseMove, 0, dMove, 0, R
+	Click, down right
 	return
 	
-~^!Left::
-	if !isON
-		return
-		
-	MouseMove, (dMove * -1), 0, 0, R
+e up::
+	Click, up right
+	return	
+	
+w::
+	Sendinput, {Wheelup 1}
 	return
 	
-~^!Right::
-	if !isON
-		return
-		
-	MouseMove, dMove, 0, 0, R
+s::
+	Sendinput, {WheelDown 1}
 	return
 	
-~^!z::
-	if !isON
-		return
-		
-	Click, left
+a::
+	Sendinput, +{Wheelup 1}
 	return
 	
-~^!+z::
-	if !isON
-		return
-		
-	Click, right
+d::
+	Sendinput, +{WheelDown 1}
+	return
+
+Up::
+	gosub MMove
 	return
 	
-~^!+Up::
-	if !isON
-		return
-		
-	MouseMove, 0, (dMoveSlow * -1), 0, R
+Down::
+	gosub MMove
 	return
 	
-~^!+Down::
-	if !isON
-		return
-		
-	MouseMove, 0, dMoveSlow, 0, R
+Left::
+	gosub MMove
 	return
 	
-~^!+Left::
-	if !isON
-		return
-		
-	MouseMove, (dMoveSlow * -1), 0, 0, R
+Right::
+	gosub MMove
 	return
 	
-~^!+Right::
-	if !isON
-		return
-		
-	MouseMove, dMoveSlow, 0, 0, R
++Up::
+	gosub MMove
 	return
 	
++Down::
+	gosub MMove
+	return
+	
++Left::
+	gosub MMove
+	return
+	
++Right::
+	gosub MMove
+	return
