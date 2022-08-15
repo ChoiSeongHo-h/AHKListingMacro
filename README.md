@@ -1,6 +1,6 @@
 # AHKListingMacro
 
-![화면 캡처 2022-08-15 035129](https://user-images.githubusercontent.com/72921481/184550893-3c94526f-082f-420c-888a-29290e597023.jpg)
+![화면 캡처 2022-08-15 035129](https://user-images.githubusercontent.com/72921481/184565438-7a1fa10f-83a8-43cc-8147-6d317bd42115.jpg)
 
 윈도우용 매크로
 
