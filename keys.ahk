@@ -50,8 +50,8 @@ ChangeEnterToSpace()
 
 CopyAndReplace()
 {
-	Sendinput, ^c
 	isWatingCopy := true
+	Sendinput, ^c
 	return
 }
 
