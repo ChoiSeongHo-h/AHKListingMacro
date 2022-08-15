@@ -1,16 +1,16 @@
-﻿;main:
+;main:
 	OnClipboardChange("ChangeEnterToSpace")
 	global isON := true
 	global isWaingCopy := false
 	dMove = 150
 	dMoveSlow = 10
-	Gui, Add, Text,, CapsLock : Hide
-	Gui, Add, Text,, c : copy with replacing enter to space
-	Gui, Add, Text,, v : Ctrl + a -> Ctrl + v
-	Gui, Add, Text,, x : Ctrl + Alt + v
-	Gui, Add, Text,, s : 캡쳐
-	Gui, Add, Text,, d : 크롬 북마크
-	Gui, Add, Text,, f : 색반전
+	Gui, Add, Button, Default w280 gToggleWindow, CapsLock : Hide
+	Gui, Add, Button, Default w280 gToggleAndCopyAndReplace, c : copy with replacing enter to space
+	Gui, Add, Button, Default w280 gToggleAndAV, v : Ctrl + a -> Ctrl + v
+	Gui, Add, Button, Default w280 gToggleAndX, x : Ctrl + Alt + v
+	Gui, Add, Button, Default w280 gToggleAndCapture, s : 캡쳐
+	Gui, Add, Button, Default w280 gToggleAndShbookmarks, d : 크롬 북마크
+	Gui, Add, Button, Default w280 gToggleAndInvert, f : 색반전
 	Gui, Add, Text,, Ctrl + Alt + 방향키 : 커서 움직임
 	Gui, Add, Text,, Ctrl + Alt + Shift + 방향키 : 느린 커서 움직임
 	Gui, Add, Text,, Ctrl + Alt + z : 좌클릭
@@ -25,7 +25,7 @@ ToggleWindow()
 	if isON
 		Gui, hide
 	else
-		Gui, Show, w300 h300
+		Gui, Show, w300 h320
 	isON := !isON
 	return
 }
@@ -40,6 +40,60 @@ ChangeEnterToSpace()
 	return
 }
 
+CopyAndReplace()
+{
+	Sendinput, ^c
+	isWaingCopy := true
+	return
+}
+
+ToggleAndCopyAndReplace()
+{
+	ToggleWindow()
+	CopyAndReplace()
+	return
+}
+
+ToggleAndAV()
+{
+	ToggleWindow()
+	sleep, 100
+	Sendinput, ^a
+	sleep, 50
+	Sendinput, ^v
+	return
+}
+
+ToggleAndX()
+{
+	ToggleWindow()
+	Sendinput, ^!v
+	return
+}
+
+ToggleAndCapture()
+{
+	ToggleWindow()
+	Sendinput, +#s
+	return
+}
+
+ToggleAndInvert()
+{
+	ToggleWindow()
+	sleep, 100
+	Sendinput, #^c
+	return
+}
+
+ToggleAndShbookmarks()
+{
+	ToggleWindow()
+	sleep, 100
+	Sendinput, ^+b
+	return
+}
+
 Capslock::
 	ToggleWindow()
 	return
@@ -47,56 +101,47 @@ Capslock::
 ~c::
 	if !isON
 		return
-		
-	ToggleWindow()
-	Sendinput, ^c
-	isWaingCopy := true
 	
+	ToggleAndCopyAndReplace()
+	return
+	
+!,::
+	CopyAndReplace()
 	return
 	
 ~x::
 	if !isON
 		return
 		
-	ToggleWindow()
-	Sendinput, ^!v
+	ToggleAndX()
 	return
 	
 ~s::
 	if !isON
 		return
 		
-	ToggleWindow()
-	Sendinput, +#s
+	ToggleAndCapture()
 	return
 	
 ~d::
 	if !isON
 		return
 		
-	ToggleWindow()
-	sleep, 100
-	Sendinput, ^+b
+	ToggleAndShbookmarks()
 	return
 	
 ~f::
 	if !isON
 		return
 		
-	ToggleWindow()
-	sleep, 100
-	Sendinput, #^c
+	ToggleAndInvert()
 	return
 
 ~v::
 	if !isON
 		return
 		
-	ToggleWindow()
-	sleep, 100
-	Sendinput, ^a
-	sleep, 50
-	Sendinput, ^v
+	ToggleAndAV()
 	return
 	
 ~^!Up::
