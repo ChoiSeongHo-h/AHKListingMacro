@@ -3,10 +3,13 @@
 	global isON := false
 	global isWatingCopy := false
 	global isCapslockDown := false
+	global isClosingBtDown := false
 	global dMove := 150
 	global dMoveSlow := 10
 	global maxMode := 2
 	global mode := 1
+	global isChecking := false
+	global isFromGesture := false
 	global gmode := 1
 	global gArrowType0 := null
 	global gArrowType1 := null
@@ -65,12 +68,13 @@ InitializeGUI()
 	GuiControl, , gArrowType0, 방향키(+ Shift) : 커서(+ 정밀)
 	GuiControl, , gArrowType1, wasd : 휠
 	GuiControl, , gmode, mode : %mode%
+	return
 }
 
 SetGUI()
 {
 	Gui, Add, Text, vgMode, mode : 1
-	Gui, Add, Button, Default w220 gToggleWindow, ESC, CapsLock : Hide
+	Gui, Add, Button, Default w220 gToggleWindow, CapsLock, ESC : Hide
 	Gui, Add, Button, Default w220 gToggleAndCopyAndReplace, c : copy with enter to space
 	Gui, Add, Button, Default w220 gToggleAndAV, v : Ctrl + (a, v)
 	Gui, Add, Button, Default w220 gToggleAndUV, x : Ctrl + Alt + v
@@ -86,6 +90,7 @@ SetGUI()
 	Gui, Add, Text,, tab, 숫자 : 모드 전환
 	Gui, +AlwaysOnTop
 	InitializeGUI()
+	return
 }
 
 ToggleWindow()
@@ -131,6 +136,7 @@ ChangeMode(n)
 		GuiControl, , gArrowType0, 방향키 : 휠
 		GuiControl, , gArrowType1, wasd(+ Shift) : 커서(+ 정밀)
 	}
+	return
 }
 
 CopyAndReplace()
@@ -150,9 +156,8 @@ ToggleAndCopyAndReplace()
 ToggleAndAV()
 {
 	ToggleWindow()
-	sleep, 100
+	Sleep, 100
 	Sendinput, ^a
-	sleep, 50
 	Sendinput, ^v
 	return
 }
@@ -174,7 +179,7 @@ ToggleAndCapture()
 ToggleAndInvert()
 {
 	ToggleWindow()
-	sleep, 100
+	Sleep, 100
 	Sendinput, #^c
 	return
 }
@@ -182,7 +187,7 @@ ToggleAndInvert()
 ToggleAndShbookmarks()
 {
 	ToggleWindow()
-	sleep, 100
+	Sleep, 100
 	Sendinput, ^+b
 	return
 }
@@ -190,7 +195,7 @@ ToggleAndShbookmarks()
 ToggleAndFind()
 {
 	ToggleWindow()
-	sleep, 100
+	Sleep, 100
 	Sendinput, ^c
 	Sendinput, ^f
 	Sendinput, ^v
@@ -200,7 +205,7 @@ ToggleAndFind()
 ToggleAndEnter()
 {
 	ToggleWindow()
-	sleep, 100
+	Sleep, 100
 	Sendinput, {enter}
 	return
 }
@@ -212,8 +217,13 @@ Capslock::
 	if (isCapslockDown = true)
 		return
 		
-	isCapslockDown :=true
+	isCapslockDown := true
 	ToggleWindow()
+	return
+	
+Capslock up::
+	Suspend, Permit
+	isCapslockDown := false
 	return
 	
 esc::
@@ -228,22 +238,113 @@ tab::
 	m := m+1
 	ChangeMode(m)
 	return
-
-Capslock up::
+	
+^up::
 	Suspend, Permit
-	isCapslockDown :=false
+	Sendinput, {F3} 
+	return
+
+F12::
+	Suspend, Permit
+	Sendinput, +{F3} 
+	return
+
+;#a::
+;	Suspend, Permit
+;	Sendinput, ^!{tab} 
+;	Sendinput, +{tab} 
+;	Sendinput, +{tab} 
+;	return
+
+;#c::
+;	Suspend, Permit
+;	Sendinput, ^!{tab} 
+;	return
+
+#Left::
+	Suspend, Permit
+	Sendinput, {home} 
+	return
+	
+#Right::
+	Suspend, Permit
+	Sendinput, {end} 
+	return
+	
+!#D::
+	Suspend, Permit
+	Sendinput, {F12} 
 	return
 
 !,::
 	Suspend, Permit
 	CopyAndReplace()
 	return
-
+	
 +^v::
 	Suspend, Permit
 	Sendinput, ^z
 	Sendinput, ^a
 	Sendinput, ^v
+	return
+	
+!;::
+	Suspend, Permit
+	if (isClosingBtDown = true)
+		return
+	
+	isClosingBtDown := true
+	if (isChecking = false)
+	{
+		isFromGesture := true
+		Sleep, 10
+		Sendinput, !'
+	}
+	else
+	{
+		Sleep, 100
+		Sendinput, {enter}
+	}
+	return
+	
+!; up::
+	Suspend, Permit
+	isClosingBtDown := false
+	return
+	
+![::
+	Suspend, Permit
+	IfWinActive ahk_exe chrome.exe
+		Sendinput, ^{tab}
+	else
+		Sendinput, {XButton2}
+	return
+	
+!]::
+	Suspend, Permit
+	IfWinActive ahk_exe chrome.exe
+		Sendinput, ^+{tab}
+	else
+		Sendinput, {XButton1}
+	return
+
+!'::
+	Suspend, Permit
+	if (isFromGesture = false)
+		return
+	
+	isChecking := true
+	msgbox, 49, 닫힘, 창을 닫을까요?, 1.5
+	IfMsgBox, OK
+	{
+		Sleep, 100
+		IfWinActive ahk_exe chrome.exe
+			Sendinput, ^w
+		else
+			Sendinput, !{F4}
+	}
+	isChecking := false
+	isFromGesture := false
 	return
 	
 c::
@@ -296,6 +397,8 @@ b::
 	ChangeMode(2)
 	return
 	
+
+
 ;--------------------------------------------------------------
 
 q::
