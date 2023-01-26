@@ -117,6 +117,7 @@ ChangeEnterToSpace()
 	clipboard = %clipboard%`r`n
 	StringReplace, clipboard, clipboard, `r`n, %A_Space%, All
 	StringReplace, clipboard, clipboard, .%A_Space%, .`r`n`r`n, All
+	StringReplace, clipboard, clipboard, al.`r`n`r`n[, al.%A_Space%[, All
 	isWatingCopy := false
 	return
 }
@@ -316,6 +317,8 @@ F12::
 	Suspend, Permit
 	IfWinActive ahk_exe chrome.exe
 		Sendinput, ^{tab}
+	else IfWinActive ahk_exe Obsidian.exe
+		Sendinput, ^{tab}
 	else
 		Sendinput, {XButton2}
 	return
@@ -323,6 +326,8 @@ F12::
 !]::
 	Suspend, Permit
 	IfWinActive ahk_exe chrome.exe
+		Sendinput, ^+{tab}
+	else IfWinActive ahk_exe Obsidian.exe
 		Sendinput, ^+{tab}
 	else
 		Sendinput, {XButton1}
@@ -339,6 +344,8 @@ F12::
 	{
 		Sleep, 100
 		IfWinActive ahk_exe chrome.exe
+			Sendinput, ^w
+		else IfWinActive ahk_exe Obsidian.exe
 			Sendinput, ^w
 		else
 			Sendinput, !{F4}
@@ -502,6 +509,11 @@ Right::
 	return
 
 +Down::
+	if (mode = 1)
+		gosub MMove
+	return
+	
++Up::
 	if (mode = 1)
 		gosub MMove
 	return
