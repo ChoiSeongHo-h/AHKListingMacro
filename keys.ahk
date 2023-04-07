@@ -118,6 +118,7 @@ ChangeEnterToSpace()
 	StringReplace, clipboard, clipboard, `r`n, %A_Space%, All
 	StringReplace, clipboard, clipboard, .%A_Space%, .`r`n`r`n, All
 	StringReplace, clipboard, clipboard, al.`r`n`r`n[, al.%A_Space%[, All
+	StringReplace, clipboard, clipboard, Fig.`r`n`r`n, Fig.%A_Space%, All
 	isWatingCopy := false
 	return
 }
